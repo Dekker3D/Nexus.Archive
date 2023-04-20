@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>net48</TargetFramework>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <Authors>Jason Couture</Authors>
     <Company />
@@ -16,6 +16,10 @@
   <ItemGroup>
     <PackageReference Include="DotNet.Glob" Version="2.1.1" />
     <PackageReference Include="SharpCompress" Version="0.22.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="System.Net.Http" />
   </ItemGroup>
 
 </Project>

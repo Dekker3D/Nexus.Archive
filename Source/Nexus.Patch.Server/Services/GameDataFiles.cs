@@ -34,7 +34,7 @@ namespace Nexus.Patch.Server.Services
             var index = 0;
             var current = this;
             for (var x = 0; x < hash.Count; x++)
-                if (!current.Children.TryGetValue(hash[x], out current) || current == null) return null;
+                if (!current.Children.TryGetValue(hash.ElementAt(x), out current) || current == null) return null;
             return current;
         }
 
@@ -43,17 +43,17 @@ namespace Nexus.Patch.Server.Services
             if (hash.Count == 0) throw new ArgumentException();
             if (hash.Count > 1)
             {
-                if (!Children.TryGetValue(hash[0], out var next) || next == null)
+                if (!Children.TryGetValue(hash.ElementAt(0), out var next) || next == null)
                 {
-                    next = new HashLookup<T>(hash[0]);
-                    Children[hash[0]] = next;
+                    next = new HashLookup<T>(hash.ElementAt(0));
+                    Children[hash.ElementAt(0)] = next;
                 }
 
                 next.Set(new ArraySegment<byte>(hash.Array, hash.Offset + 1, hash.Count - 1), value);
             }
             else if (hash.Count == 1)
             {
-                Children[hash[0]] = new HashLookup<T>(hash[0], value);
+                Children[hash.ElementAt(0)] = new HashLookup<T>(hash.ElementAt(0), value);
             }
 
         }
@@ -203,7 +203,7 @@ namespace Nexus.Patch.Server.Services
                 var fileName = file.FileName ?? Path.GetFileName(file.Path);
                 var hash = GetFileHash(file.Path);
                 Logger.LogInformation("Adding file {name} ({filePath}) to index with hash {hash}", fileName, file.Path, BitConverter.ToString(hash).ToLower().Replace("-", ""));
-                _lookup.Set(hash, new LocalFile(file.Path));
+                _lookup.Set(new ArraySegment<byte>(hash), new LocalFile(file.Path));
                 if (!file.PublishBin) continue;
                 Logger.LogInformation("Adding file {fileName} info to .bin file lookup", fileName);
                 _fileEntries.Add(new FileEntry()
@@ -223,7 +223,7 @@ namespace Nexus.Patch.Server.Services
                 Logger.LogInformation("Indexing {count} hashes from {archive}", archive.FileData.Count(), Path.GetFileName(archive.FileName));
                 foreach (var dataEntry in archive.FileData) //_archiveFiles.SelectMany(i => i.FileData.Select(x => new DataEntryReference(i, x))))
                 {
-                    _lookup.Set(dataEntry.Hash, new DataEntryReference(archive, dataEntry));
+                    _lookup.Set(new ArraySegment<byte>(dataEntry.Hash), new DataEntryReference(archive, dataEntry));
                     //Debug.Assert(_lookup.Find(dataEntry.FileEntry.Hash) != null);
                 }
             }
@@ -231,7 +231,7 @@ namespace Nexus.Patch.Server.Services
 
         public Stream OpenHash(byte[] hash)
         {
-            var ret = _lookup.Find(hash)?.Value?.Open();
+            var ret = _lookup.Find(new ArraySegment<byte>(hash))?.Value?.Open();
             if (Logger.IsEnabled(LogLevel.Trace))
             {
                 Logger.LogTrace("OPEN: {hash} ({status})", ToHexString(hash),
