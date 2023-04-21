@@ -14,6 +14,9 @@ namespace Nexus.Patch.Server
     {
         public static void Main(string[] args)
         {
+            string workingDir = Path.GetDirectoryName(
+      System.Reflection.Assembly.GetExecutingAssembly().GetName().CodeBase).Substring(6);
+            Directory.SetCurrentDirectory(workingDir); // ugly hack to fix working dir.
             CreateWebHostBuilder(args).Build().Run();
         }
 
