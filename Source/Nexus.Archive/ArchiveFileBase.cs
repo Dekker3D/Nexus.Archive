@@ -6,6 +6,7 @@ using System.IO.MemoryMappedFiles;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Runtime.Remoting.Messaging;
 using System.Text;
 
 namespace Nexus.Archive
@@ -51,6 +52,14 @@ namespace Nexus.Archive
             }
         }
 
+        private void WriteRootBlock(IViewableData file, BlockInfoHeader rootBlockInfo)
+        {
+            using (var writer = new BinaryWriter(GetBlockView(rootBlockInfo, file)))
+            {
+                RootIndex.Write(writer);
+            }
+        }
+
         internal BinaryReader GetBlockReader(int index, Encoding encoding = null)
         {
             encoding = encoding ?? Encoding.UTF8;
@@ -93,6 +102,20 @@ namespace Nexus.Archive
             return blockPointers;
         }
 
+        private void WriteBlockPointers(
+            IViewableData file)
+        {
+            var startPosition = Header.DataHeader.BlockTableOffset;
+            var length = Header.DataHeader.BlockCount * Marshal.SizeOf<BlockInfoHeader>();
+            using (var writer = new BinaryWriter(file.CreateView((long)startPosition, length)))
+            {
+                for (var x = 0; x < Header.DataHeader.BlockCount; x++)
+                {
+                    BlockPointers[x].Write(writer);
+                }
+            }
+        }
+
 
         private static ArchiveHeader ReadHeader(IViewableData file)
         {
@@ -103,9 +126,18 @@ namespace Nexus.Archive
             }
         }
 
-        private static IViewableData OpenFile(string fileName)
+        private void WriteHeader(IViewableData file)
         {
-            return new MemoryMappedViewableData(fileName, FileAccess.Read);
+            var length = Marshal.SizeOf<ArchiveHeader>();
+            using (var stream = file.CreateView(0, length))
+            {
+                Header.WriteTo(stream);
+            }
+        }
+
+        private static IViewableData OpenFile(string fileName, FileAccess fileAccess = FileAccess.Read)
+        {
+            return new MemoryMappedViewableData(fileName, fileAccess);
         }
 
         public static ArchiveFileBase FromFile(string fileName)
@@ -133,6 +165,31 @@ namespace Nexus.Archive
                 }
 
                 throw new InvalidDataException($"Failed to read file {fileName}", ex);
+            }
+        }
+
+        public void ToFile(string fileName)
+        {
+            var file = OpenFile(fileName, FileAccess.Write);
+            try
+            {
+                WriteHeader(file);
+                WriteBlockPointers(file);
+                WriteRootBlock(file, BlockPointers[Header.DataHeader.RootBlockIndex]);
+            }
+            catch(Exception ex)
+            {
+
+                try
+                {
+                    file.Dispose();
+                }
+                catch
+                {
+                    // Ignored.
+                }
+
+                throw new InvalidDataException($"Failed to write file {fileName}", ex);
             }
         }
 

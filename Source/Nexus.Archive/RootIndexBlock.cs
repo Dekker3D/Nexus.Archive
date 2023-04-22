@@ -33,5 +33,24 @@ namespace Nexus.Archive
             ret.BlockIndex = reader.ReadInt32();
             return ret;
         }
+
+        public void Write(BinaryWriter writer)
+        {
+            writer.Write(Version);
+            if(Version == 1)
+            {
+                writer.Write(BuildNumber);
+            }
+            else if (Version == 2)
+            {
+                writer.Write(BlockCount);
+            }
+            else
+            {
+                throw new InvalidDataException($"Unknown file version {Version} for archive type {ArchiveType}");
+            }
+
+            writer.Write(BlockIndex);
+        }
     }
 }

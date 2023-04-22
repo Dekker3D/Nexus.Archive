@@ -15,5 +15,11 @@ namespace Nexus.Archive
                 Size = reader.ReadUInt64()
             };
         }
+
+        public void Write(BinaryWriter writer)
+        {
+            writer.Write(Offset);
+            writer.Write(Size);
+        }
     }
 }

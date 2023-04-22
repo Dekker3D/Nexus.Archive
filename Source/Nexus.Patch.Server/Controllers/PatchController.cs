@@ -23,7 +23,7 @@ namespace Nexus.Patch.Server.Controllers
         }
         [HttpHead("version.txt")]
         [HttpGet("version.txt")]
-        [ResponseCache()]
+        [ResponseCache(Duration = 7776000, Location = ResponseCacheLocation.Any)]
         public IActionResult VersionTxt()
         {
             return HandleResponse(Encoding.UTF8.GetBytes(GameDataFiles.Build.ToString()), "text/plain");

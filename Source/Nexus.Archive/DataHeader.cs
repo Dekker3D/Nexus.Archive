@@ -32,5 +32,15 @@ namespace Nexus.Archive
             };
             return ret;
         }
+
+        public void WriteTo(BinaryWriter binaryWriter)
+        {
+            binaryWriter.Write(FileSize);
+            binaryWriter.Write(Reserved);
+            binaryWriter.Write(BlockTableOffset);
+            binaryWriter.Write(BlockCount);
+            binaryWriter.Write(RootBlockIndex);
+            binaryWriter.Write(ReverseSeekGuard);
+        }
     }
 }

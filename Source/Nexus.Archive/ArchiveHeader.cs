@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -39,6 +40,17 @@ namespace Nexus.Archive
             if(ret.Signature != PackSignature) throw new InvalidDataException($"File header value {ret.Signature:X4} does not match expected {PackSignature:X4}");
 
             return ret;
+        }
+
+        public void WriteTo(Stream stream)
+        {
+            using (var binaryWriter = new BinaryWriter(stream, Encoding.UTF8, true))
+            {
+                binaryWriter.Write(Signature);
+                binaryWriter.Write(Version);
+                binaryWriter.Write(Reserved, 0, ReservedSectionSize);
+                DataHeader.WriteTo(binaryWriter);
+            }
         }
 
         public DataHeader DataHeader;
