@@ -28,6 +28,17 @@ namespace Nexus.Archive
             return ret;
         }
 
+        public void Write(BinaryWriter writer)
+        {
+            writer.Write(NameOffset);
+            writer.Write((uint)Flags);
+            writer.Write(WriteTime.ToFileTime());
+            writer.Write(UncompressedSize);
+            writer.Write(CompressedSize);
+            writer.Write(Hash, 0, 20);
+            writer.Write(Reserved);
+        }
+
         public override string ToString()
         {
             return ToString(false);

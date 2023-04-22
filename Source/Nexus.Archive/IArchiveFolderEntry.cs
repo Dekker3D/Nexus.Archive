@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 
 namespace Nexus.Archive
 {
@@ -7,5 +8,6 @@ namespace Nexus.Archive
         IEnumerable<IArchiveFilesystemEntry> EnumerateChildren(bool recurse = false);
         IEnumerable<IArchiveFolderEntry> EnumerateFolders(bool recurse = false);
         IEnumerable<IArchiveFileEntry> EnumerateFiles(bool recurse = false);
+        void Write(BinaryWriter writer);
     }
 }

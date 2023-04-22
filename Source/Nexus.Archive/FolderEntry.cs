@@ -53,6 +53,20 @@ namespace Nexus.Archive
             //var nameData = reader.ReadBytes((int)nameLength);
         }
 
+        public void Write(BinaryWriter writer)
+        {
+            writer.Write(Subdirectories);
+            writer.Write(Files);
+            foreach(FolderPointer folder in _folderPointers)
+            {
+                folder.Write(writer);
+            }
+            foreach(FileEntry file in _files)
+            {
+                file.Write(writer);
+            }
+        }
+
         public int Subdirectories { get; }
         public int Files { get; }
         public IEnumerable<IArchiveFilesystemEntry> Children => _lazyChildrenReader.Value;

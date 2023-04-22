@@ -6,7 +6,7 @@
     <Version>1.0.1</Version>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.DotNet.ILCompiler" />
+    <PackageReference Include="Microsoft.DotNet.ILCompiler" Version="7.0.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Nexus.Archive\Nexus.Archive.csproj" />

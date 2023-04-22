@@ -18,6 +18,14 @@ namespace Nexus.Archive
                 new BinaryReader(GetBlockView(rootIndex.BlockIndex), Encoding.UTF8));
         }
 
+        public void Write(IViewableData file)
+        {
+            using (var writer = new BinaryWriter(GetBlockView(RootIndex.BlockIndex), Encoding.UTF8))
+            {
+                RootFolder.Write(writer);
+            }
+        }
+
         public IEnumerable<IArchiveFilesystemEntry> GetFilesystemEntries()
         {
             return RootFolder.EnumerateChildren(true);

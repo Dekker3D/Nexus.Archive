@@ -31,7 +31,6 @@ namespace Nexus.Patch.Server.Services
         public HashLookup<T> Find(ArraySegment<byte> hash)
         {
             if (hash.Count == 0) return this;
-            var index = 0;
             var current = this;
             for (var x = 0; x < hash.Count; x++)
                 if (!current.Children.TryGetValue(hash.ElementAt(x), out current) || current == null) return null;

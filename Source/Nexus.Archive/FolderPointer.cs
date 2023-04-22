@@ -16,5 +16,11 @@ namespace Nexus.Archive
             ret.FolderBlock = reader.ReadInt32();
             return ret;
         }
+
+        public void Write(BinaryWriter writer)
+        {
+            writer.Write(NameOffset);
+            writer.Write(FolderBlock);
+        }
     }
 }
