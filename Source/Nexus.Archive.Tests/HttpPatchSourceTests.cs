@@ -16,10 +16,12 @@ namespace Nexus.Archive.Tests
     public class CoreDataArchiveFixture
     {
         public ArchiveFile CoreData { get; }
+        public string BasePath;
+
         public CoreDataArchiveFixture()
         {
-            var basePath = Directory.CreateDirectory("Patch").FullName;
-            var fileName = Path.Combine(basePath, "CoreData.archive");
+            BasePath = Directory.CreateDirectory("Patch").FullName;
+            var fileName = Path.Combine(BasePath, "CoreData.archive");
             if (!File.Exists(fileName)) return;
             CoreData = (ArchiveFile)ArchiveFile.FromFile(fileName);
         }

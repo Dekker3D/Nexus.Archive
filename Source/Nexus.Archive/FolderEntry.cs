@@ -99,6 +99,11 @@ namespace Nexus.Archive
             return System.IO.Path.Combine(Path, name);
         }
 
+        private string GetWritePath(string path)
+        {
+            return System.IO.Path.GetFileName(path);
+        }
+
         public override string ToString()
         {
             return Path;
