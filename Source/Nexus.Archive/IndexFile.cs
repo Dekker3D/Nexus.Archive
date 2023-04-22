@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.MemoryMappedFiles;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Text;
 using DotNet.Globbing;
 
@@ -18,17 +16,7 @@ namespace Nexus.Archive
         {
             RootFolder = new FolderEntry("", this,
                 new BinaryReader(GetBlockView(rootIndex.BlockIndex), Encoding.UTF8));
-
-            using (var fileStream = System.IO.File.Open(FileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-            using (var sha = SHA1.Create())
-            {
-                _fileHash = sha.ComputeHash(fileStream);
-            }
         }
-
-        private readonly byte[] _fileHash;
-
-        public byte[] FileHash => _fileHash.ToArray();
 
         public IEnumerable<IArchiveFilesystemEntry> GetFilesystemEntries()
         {
