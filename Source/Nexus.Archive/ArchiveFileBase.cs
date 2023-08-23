@@ -55,26 +55,31 @@ namespace Nexus.Archive
             }
         }
 
+        public ulong GetBlockSizeInBytes()
+        {
+            ulong ret = 0;
+            foreach(BlockInfoHeader header in BlockPointers)
+            {
+                ret += header.Size;
+            }
+            return ret;
+        }
+
         internal BinaryReader GetBlockReader(int index, Encoding encoding = null)
         {
             encoding = encoding ?? Encoding.UTF8;
             return new BinaryReader(GetBlockView(index), encoding, false);
         }
 
-        internal Stream GetBlockView(int index)
+        internal Stream GetBlockView(int index, IViewableData file = null)
         {
-            return GetBlockView(BlockPointers[index]);
+            return GetBlockView(BlockPointers[index], file ?? File);
         }
 
         private static Stream GetBlockView(BlockInfoHeader blockInfo, IViewableData file)
         {
             if (blockInfo.Size == 0) return null;
             return file.CreateView((long)blockInfo.Offset, (long)blockInfo.Size);
-        }
-
-        protected Stream GetBlockView(BlockInfoHeader blockInfo)
-        {
-            return GetBlockView(blockInfo, File);
         }
 
         /// <summary>
@@ -111,6 +116,11 @@ namespace Nexus.Archive
             }
         }
 
+        public ulong GetBlockPointersSizeInBytes()
+        {
+            return (ulong)(Header.DataHeader.BlockCount * Marshal.SizeOf<BlockInfoHeader>());
+        }
+
 
         private static ArchiveHeader ReadHeader(IViewableData file)
         {
@@ -130,9 +140,14 @@ namespace Nexus.Archive
             }
         }
 
-        private static IViewableData OpenFile(string fileName, FileAccess fileAccess = FileAccess.Read)
+        public ulong GetHeaderSizeInBytes()
         {
-            return new MemoryMappedViewableData(fileName, fileAccess);
+            return (ulong)Marshal.SizeOf<ArchiveHeader>();
+        }
+
+        private static IViewableData OpenFile(string fileName, FileAccess fileAccess = FileAccess.Read, long capacity = 0)
+        {
+            return new MemoryMappedViewableData(fileName, fileAccess, capacity);
         }
 
         public static ArchiveFileBase FromFile(string fileName)
@@ -165,27 +180,39 @@ namespace Nexus.Archive
 
         public void ToFile(string fileName)
         {
-            var file = OpenFile(fileName, FileAccess.Write);
-            try
+            using (var file = OpenFile(fileName, FileAccess.ReadWrite, (long)Header.DataHeader.FileSize/*(long)GetSizeInBytes()*/))
             {
-                WriteHeader(file);
-                WriteBlockPointers(file);
-                WriteRootBlock(file, BlockPointers[Header.DataHeader.RootBlockIndex]);
-            }
-            catch(Exception ex)
-            {
-
                 try
                 {
-                    file.Dispose();
+                    WriteHeader(file);
+                    WriteBlockPointers(file);
+                    WriteRootBlock(file, BlockPointers[Header.DataHeader.RootBlockIndex]);
+                    Write(file);
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // Ignored.
-                }
+                    try
+                    {
+                        file.Dispose();
+                    }
+                    catch
+                    {
+                        // Ignored.
+                    }
 
-                throw new InvalidDataException($"Failed to write file {fileName}", ex);
+                    throw new InvalidDataException($"Failed to write file {fileName}", ex);
+                }
             }
+        }
+
+        protected virtual void Write(IViewableData file)
+        {
+
+        }
+
+        public virtual ulong GetSizeInBytes()
+        {
+            return GetHeaderSizeInBytes() + GetBlockPointersSizeInBytes() + GetBlockSizeInBytes();
         }
 
         protected virtual void Dispose(bool disposing)

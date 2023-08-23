@@ -18,13 +18,18 @@ namespace Nexus.Archive
                 new BinaryReader(GetBlockView(rootIndex.BlockIndex), Encoding.UTF8));
         }
 
-        public void Write(IViewableData file)
+        protected override void Write(IViewableData file)
         {
-            using (var writer = new BinaryWriter(GetBlockView(RootIndex.BlockIndex), Encoding.UTF8))
+            using (var writer = new BinaryWriter(GetBlockView(RootIndex.BlockIndex, file), Encoding.UTF8))
             {
                 RootFolder.Write(writer);
             }
         }
+
+        /*public override ulong GetSizeInBytes()
+        {
+            return RootFolder.GetSizeInBytes() + base.GetSizeInBytes();
+        }*/
 
         public IEnumerable<IArchiveFilesystemEntry> GetFilesystemEntries()
         {

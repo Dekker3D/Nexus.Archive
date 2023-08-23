@@ -9,5 +9,6 @@ namespace Nexus.Archive
         IEnumerable<IArchiveFolderEntry> EnumerateFolders(bool recurse = false);
         IEnumerable<IArchiveFileEntry> EnumerateFiles(bool recurse = false);
         void Write(BinaryWriter writer);
+        ulong GetSizeInBytes();
     }
 }

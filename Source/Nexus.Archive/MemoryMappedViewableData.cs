@@ -11,7 +11,7 @@ namespace Nexus.Archive
         private MemoryMappedFile _file;
         private Stream _fileStream;
 
-        public MemoryMappedViewableData(string fileName, FileAccess fileAccess)
+        public MemoryMappedViewableData(string fileName, FileAccess fileAccess, long capacity = 0)
         {
             FileName = fileName;
             _fileAccessMode = fileAccess;
@@ -27,9 +27,9 @@ namespace Nexus.Archive
                     throw new NotSupportedException("Only read, or Read/Write is supported");
             }
 
-            var fileStream = System.IO.File.Open(fileName, FileMode.Open, _fileAccessMode, FileShare.ReadWrite);
+            var fileStream = System.IO.File.Open(fileName, fileAccess == FileAccess.Read ? FileMode.Open : FileMode.OpenOrCreate, _fileAccessMode, FileShare.ReadWrite);
             _fileStream = fileStream;
-            _file = MemoryMappedFile.CreateFromFile(fileStream, null, 0, _memoryMappedFileAccessMode, HandleInheritability.Inheritable, false);
+            _file = MemoryMappedFile.CreateFromFile(fileStream, null, capacity, _memoryMappedFileAccessMode, HandleInheritability.Inheritable, false);
         }
 
         public string FileName { get; }

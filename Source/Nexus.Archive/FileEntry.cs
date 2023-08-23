@@ -39,6 +39,8 @@ namespace Nexus.Archive
             writer.Write(Reserved);
         }
 
+        public static ulong SizeInBytes => 56;
+
         public override string ToString()
         {
             return ToString(false);

@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 
 namespace Nexus.Archive
 {
@@ -36,6 +37,7 @@ namespace Nexus.Archive
 
         public void Write(BinaryWriter writer)
         {
+            writer.Write((UInt32)ArchiveType);
             writer.Write(Version);
             if(Version == 1)
             {

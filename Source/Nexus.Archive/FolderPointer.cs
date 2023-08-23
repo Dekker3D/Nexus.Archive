@@ -7,7 +7,8 @@ namespace Nexus.Archive
         public const int Size = 8;
         public int FolderBlock;
         public uint NameOffset;
-        public string Name { get; internal set; }
+        public string Name;
+        public string Path;
 
         public static FolderPointer FromReader(BinaryReader reader)
         {
@@ -22,5 +23,7 @@ namespace Nexus.Archive
             writer.Write(NameOffset);
             writer.Write(FolderBlock);
         }
+
+        public static ulong SizeInBytes => 8;
     }
 }

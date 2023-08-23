@@ -13,13 +13,11 @@ namespace Nexus.Archive
         private readonly FileEntry[] _files;
         private readonly FolderPointer[] _folderPointers;
         private readonly IndexFile _index;
-        private readonly Lazy<List<IArchiveFilesystemEntry>> _lazyChildrenReader;
 
         public FolderEntry(string name, IndexFile indexFile, BinaryReader reader)
         {
             _index = indexFile;
             Path = name;
-            _lazyChildrenReader = new Lazy<List<IArchiveFilesystemEntry>>(ReadChildren, false);
             Subdirectories = reader.ReadInt32();
             Files = reader.ReadInt32();
             var dataSize = FolderPointer.Size * Subdirectories + FileEntry.Size * Files + 8;
@@ -46,11 +44,18 @@ namespace Nexus.Archive
             }
 
             foreach (var folder in _folderPointers)
-                folder.Name = GetChildPath(ReadName((int) folder.NameOffset));
+            {
+                folder.Name = ReadName((int)folder.NameOffset);
+                folder.Path = GetChildPath(folder.Name);
+            }
 
             foreach (var file in _files)
-                file.Path = GetChildPath(ReadName(file.NameOffset));
-            //var nameData = reader.ReadBytes((int)nameLength);
+            {
+                file.Name = ReadName(file.NameOffset);
+                file.Path = GetChildPath(file.Name);
+            }
+
+            Children = ReadChildren();
         }
 
         public void Write(BinaryWriter writer)
@@ -67,9 +72,23 @@ namespace Nexus.Archive
             }
         }
 
+        public ulong GetSizeInBytes()
+        {
+            ulong nameSize = 0;
+            foreach (FolderPointer folder in _folderPointers)
+            {
+                nameSize += (ulong)folder.Name.Length + 1;
+            }
+            foreach (FileEntry file in _files)
+            {
+                nameSize += (ulong)file.Name.Length + 1;
+            }
+            return 8 + (ulong)Subdirectories * FolderPointer.SizeInBytes + (ulong)Files * FileEntry.SizeInBytes + nameSize;
+        }
+
         public int Subdirectories { get; }
         public int Files { get; }
-        public IEnumerable<IArchiveFilesystemEntry> Children => _lazyChildrenReader.Value;
+        public IEnumerable<IArchiveFilesystemEntry> Children { get; protected set; }
 
         public IEnumerable<IArchiveFilesystemEntry> EnumerateChildren(bool recurse = false)
         {
