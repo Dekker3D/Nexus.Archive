@@ -2,6 +2,7 @@
 using System.IO;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 
 namespace Nexus.Patch.Server
 {
@@ -17,7 +18,18 @@ namespace Nexus.Patch.Server
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
-                .UseUrls("http://localhost:80")
+                .UseUrls(GetServerUrl())
                 .UseStartup<Startup>();
+
+        private static string GetServerUrl()
+        {
+            var configuration = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .Build();
+
+            // Get URL from configuration
+            return configuration["Url"] ?? "http://localhost:80"; // Default fallback
+        }
     }
 }
