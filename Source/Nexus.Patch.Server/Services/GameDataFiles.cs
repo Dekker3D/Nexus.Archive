@@ -178,7 +178,7 @@ namespace Nexus.Patch.Server.Services
             }
 
             Logger.LogInformation("Adding client files (Client, Client64, Launcher)");
-            foreach (var localFile in new[] { "Client", "Client64", "Launcher" }.Select(i => Path.Combine(basePath, i))
+            foreach (var localFile in new[] { "Client", "Client64", "Launcher", "Custom" }.Select(i => Path.Combine(basePath, i))
                 .Where(Directory.Exists)
                 .SelectMany(i => Directory.EnumerateFiles(i, "*.*", SearchOption.AllDirectories)))
             {
