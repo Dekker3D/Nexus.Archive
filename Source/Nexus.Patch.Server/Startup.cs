@@ -36,7 +36,15 @@ namespace Nexus.Patch.Server
                 
             }
 
-            app.UseMvc();
+
+            app.UseRouting();
+
+            app.UseAuthorization();
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+            });
             serviceProvider.GetRequiredService<IGameDataFiles>();
         }
     }
